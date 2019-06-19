@@ -3,7 +3,12 @@ var app = express();
 app.set("view engine", "ejs");
 var bodyParser = require("body-parser");
 var mongoose = require("mongoose");
+var Campground = require("./models/campground");
+var Comment = require("./models/comment");
+// var user = require("./models/user");
+var seedDB = require("./seeds");
 
+seedDB();
 mongoose.connect("mongodb://localhost/yelp_camp");
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -11,17 +16,12 @@ app.get("/", function(req, res){
     res.render("landing");
 });
 
-// SCHEMA SETUP
-var campgroundSchema = new mongoose.Schema({
-    name: String,
-    image: String
-});
 
-var Campground = mongoose.model("Campground", campgroundSchema);
 // Campground.create(
 //   {
 //       name: "Huang",
-//       image: "https://upload.wikimedia.org/wikipedia/commons/1/1d/Huangshan_pic_4.jpg"
+//       image: "https://upload.wikimedia.org/wikipedia/commons/1/1d/Huangshan_pic_4.jpg",
+//       description: "还行，就是有点远嗷"
 //   }, function(err, campground){
 //       if(err){
 //           console.log(err);
@@ -41,7 +41,7 @@ app.get("/campgrounds", function(req, res){
             console.log(err);
         }
         else{
-            res.render("campground", {campground: allCampground});
+            res.render("index", {campground: allCampground});
         }
     });
 });
@@ -49,7 +49,8 @@ app.get("/campgrounds", function(req, res){
 app.post("/campgrounds", function(req, res){
     var name = req.body.name;
     var image = req.body.image;
-    var newCampground = {name: name, image: image};
+    var desc = req.body.description;
+    var newCampground = {name: name, image: image, description: desc};
     // Create a new campground and save to DB
     Campground.create(newCampground, function(err, newCreated){
         if(err){
@@ -65,6 +66,18 @@ app.post("/campgrounds", function(req, res){
 
 app.get("/campgrounds/new", function(req, res){
     res.render("new.ejs");
+});
+
+app.get("/campgrounds/:id", function(req, res){
+    Campground.findById(req.params.id, function(err, foundCampground){
+        if(err){
+            console.log(err);
+            console.log(req.params.id);
+        }
+        else{
+            res.render("show", {campground: foundCampground});
+        }
+    });
 });
 
 app.listen(4396, process.env.IP, function(){
