@@ -19,6 +19,11 @@ var data = [
     }
 ];
 
+var comment2 = {
+    text: "Yea!",
+    author: "YU111"
+}
+
 function seedDB(){
     // Remove all campgrounds
     Campground.remove({}, function(err){
@@ -34,17 +39,19 @@ function seedDB(){
                 }
                 else{
                     console.log("Add");
-                    Comment.create(
-                        {
-                        text: "Yea!",
-                        author: "YU"
-                    }, function(err, comment){
+                    Comment.create(comment2, function(err, comment){
                         if(err){
                             console.log(err);
                         }
                         else{
-                            campground.comments.push(comment);
-                            campground.save();
+                            campground.comments =  campground.comments.concat([comment]);
+                            campground.save(function(err){
+                                if(err){
+                                     console.log(err);
+                                     return;
+                                }
+                            });
+                            console.log(campground);
                             console.log("Created new comment");
                         }
                     });
